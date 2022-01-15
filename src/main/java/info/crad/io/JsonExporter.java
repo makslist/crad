@@ -1,4 +1,4 @@
-package info.crad.export;
+package info.crad.io;
 
 import com.fasterxml.jackson.core.util.*;
 import com.fasterxml.jackson.databind.*;
@@ -25,9 +25,9 @@ public class JsonExporter implements Exporter {
 
   @Override
   public void write(DbObject object) throws IOException {
-    File basePath = new File(baseFolder, "json");
+    File basePath = new File(baseFolder);
     if (basePath.isDirectory() || basePath.mkdir()) {
-      File path = new File(basePath, object.type().toLowerCase());
+      File path = new File(basePath, object.getClass().getSuperclass().getSimpleName().toLowerCase());
       if (path.isDirectory() || path.mkdir()) {
         System.out.println("Writing: " + object.name().toLowerCase());
         jsonWriter.writeValue(new File(path, object.name().toLowerCase() + fileExtension), object);

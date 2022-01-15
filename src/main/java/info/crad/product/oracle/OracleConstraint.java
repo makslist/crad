@@ -1,4 +1,4 @@
-package info.crad.dbobjects.oracle;
+package info.crad.product.oracle;
 
 import com.fasterxml.jackson.annotation.*;
 import info.crad.dbobjects.*;
@@ -12,6 +12,15 @@ public class OracleConstraint extends Constraint {
   private static final String SQL = "SELECT * FROM USER_CONSTRAINTS WHERE CONSTRAINT_TYPE IN ('P', 'R', 'O') AND TABLE_NAME = ?";
 
   private static final String SQL_COLUMN = "SELECT CC.* FROM USER_CONS_COLUMNS CC JOIN USER_CONSTRAINTS C ON (CC.OWNER = C.OWNER AND CC.CONSTRAINT_NAME = C.CONSTRAINT_NAME) WHERE C.CONSTRAINT_NAME = ? ORDER BY POSITION";
+  private List<String> columns = new ArrayList<>();
+
+  private OracleConstraint(ResultSet resultSet, Table table) throws SQLException {
+    this.table = table;
+    name = resultSet.getString("CONSTRAINT_NAME");
+    constraintType = resultSet.getString("CONSTRAINT_TYPE");
+    status = resultSet.getString("STATUS");
+    indexName = resultSet.getString("INDEX_NAME");
+  }
 
   public static void select(Connection conn, Table table) throws SQLException {
     try (PreparedStatement stmt = conn.prepareStatement(SQL)) {
@@ -32,16 +41,6 @@ public class OracleConstraint extends Constraint {
       while (resultSet.next())
         constraint.columns.add(resultSet.getString("COLUMN_NAME"));
     }
-  }
-
-  private List<String> columns = new ArrayList<>();
-
-  private OracleConstraint(ResultSet resultSet, Table table) throws SQLException {
-    this.table = table;
-    name = resultSet.getString("CONSTRAINT_NAME");
-    constraintType = resultSet.getString("CONSTRAINT_TYPE");
-    status = resultSet.getString("STATUS");
-    indexName = resultSet.getString("INDEX_NAME");
   }
 
   public void setIndex(List<String> columns) {
@@ -85,7 +84,7 @@ public class OracleConstraint extends Constraint {
 
     stmt.append("  using index\n");
     final Index index = table.getIndex(indexName);
-    stmt.append(index.tablespace()).append(";\n");
+    stmt.append(index.getTablespace().create()).append(";\n");
     if (index.getLogging().equals("NO"))
       stmt.append("alter index ").append(index.name()).append(" nologging;");
     stmt.append("\n");
@@ -94,10 +93,6 @@ public class OracleConstraint extends Constraint {
 
   public String toString() {
     return name;
-  }
-
-  public String type() {
-    return "GRANT";
   }
 
   public String typeShort() {

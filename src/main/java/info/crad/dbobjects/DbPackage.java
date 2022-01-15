@@ -7,9 +7,9 @@ import java.util.stream.*;
 
 public class DbPackage implements DbObject, Source {
 
+  public List<String> spec;
+  public List<String> body;
   protected String name;
-  protected List<String> spec;
-  protected List<String> body;
 
   @JsonProperty("name")
   @Override
@@ -27,11 +27,6 @@ public class DbPackage implements DbObject, Source {
   public String createStatement() {
     return "create or replace " + String.join("\n", spec) + "\n/\n" + "create or replace "
         + String.join("\n", body) + "\n/";
-  }
-
-  @Override
-  public String type() {
-    return "PACKAGE";
   }
 
   @Override

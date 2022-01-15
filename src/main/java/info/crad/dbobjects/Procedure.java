@@ -26,11 +26,6 @@ public class Procedure implements DbObject, Source {
   }
 
   @Override
-  public String type() {
-    return "PROCEDURE";
-  }
-
-  @Override
   public String typeShort() {
     return "prc";
   }

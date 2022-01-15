@@ -57,14 +57,9 @@ public class Sequence implements DbObject {
         "start with " + lastNumber + "\n" +
         "increment by " + incrementBy + "\n" +
         (cacheSize != 0 ? ("cache " + cacheSize) : "nocache") + "\n" +
-        (cycleFlag.equals("Y") ? "cycle" : "nocycle") + "\n" ;
+        (cycleFlag.equals("Y") ? "cycle" : "nocycle") + "\n";
 //   TODO ANSI SQL? +
 //        (orderFlag.equals("Y") ? "order" : "noorder") + "\n";
-  }
-
-  @Override
-  public String type() {
-    return "SEQUENCE";
   }
 
   @Override

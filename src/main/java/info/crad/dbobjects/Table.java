@@ -5,46 +5,23 @@ import com.fasterxml.jackson.annotation.*;
 import java.util.*;
 import java.util.stream.*;
 
-@JsonPropertyOrder({"name", "tablespaceName", "comments"})
-public class Table implements DbObject, TableSpace {
+@JsonPropertyOrder({"name", "comments"})
+public class Table implements DbObject {
+
+  public String name;
+  protected String comments;
+  private final List<Column> columns = new ArrayList<>();
+  public Tablespace tablespace;
+  private final List<Index> indexes = new ArrayList<>();
+  private final List<Constraint> constraints = new ArrayList<>();
+  public final List<Privilege> privileges = new ArrayList<>();
 
   public boolean equalsPk(Table table) {
     return name().equals(table.name());
   }
 
-  protected String name;
-  protected String tablespaceName;
-  protected String pctFree;
-  protected long iniTrans;
-  protected long maxTrans;
-  protected long initialExtent;
-  protected long nextExtent;
-  protected long minExtents;
-  protected int maxExtents;
-  protected String comments;
-
-  private List<Column> columns = new ArrayList<>();
-  private List<Index> indexes = new ArrayList<>();
-  private List<Constraint> constraints = new ArrayList<>();
-  private List<Privilege> privileges = new ArrayList<>();
-
-  public void setColumns(List<Column> columns) {
-    this.columns = new ArrayList<>(columns);
-    this.columns.forEach(c -> c.setTable(this));
-  }
-
-  public void setIndexes(List<Index> indexes) {
-    this.indexes = indexes;
-    indexes.forEach(i -> i.setTable(this));
-  }
-
-  public void setConstraints(List<Constraint> constraints) {
-    this.constraints = constraints;
-    constraints.forEach(c -> c.setTable(this));
-  }
-
   public void setPrivileges(List<Privilege> privileges) {
-    this.privileges = privileges;
+    this.privileges.addAll(privileges);
   }
 
   @JsonProperty("name")
@@ -53,40 +30,12 @@ public class Table implements DbObject, TableSpace {
     return name;
   }
 
-  public String getTablespaceName() {
-    return tablespaceName;
-  }
-
-  public String getPctFree() {
-    return pctFree;
-  }
-
-  public long getIniTrans() {
-    return iniTrans;
-  }
-
-  public long getMaxTrans() {
-    return maxTrans;
-  }
-
-  public long getInitialExtent() {
-    return initialExtent;
-  }
-
-  public long getNextExtent() {
-    return nextExtent;
-  }
-
-  public long getMinExtents() {
-    return minExtents;
-  }
-
-  public long getMaxExtents() {
-    return maxExtents;
-  }
-
   public String getComments() {
     return comments;
+  }
+
+  public Tablespace getTablespace() {
+    return tablespace;
   }
 
   public void addColumn(Column column) {
@@ -97,6 +46,11 @@ public class Table implements DbObject, TableSpace {
     return columns;
   }
 
+  public void setColumns(List<Column> columns) {
+    this.columns.addAll(columns);
+    this.columns.forEach(c -> c.setTable(this));
+  }
+
   public void addIndex(Index index) {
     indexes.add(index);
   }
@@ -105,12 +59,23 @@ public class Table implements DbObject, TableSpace {
     return indexes;
   }
 
+  @JsonProperty("indexes")
+  public void setIndexes(List<Index> indexes) {
+    this.indexes.addAll(indexes);
+    indexes.forEach(i -> i.setTable(this));
+  }
+
   public void addConstraint(Constraint constraint) {
     constraints.add(constraint);
   }
 
   public List<Constraint> getConstraints() {
     return constraints;
+  }
+
+  public void setConstraints(List<Constraint> constraints) {
+    this.constraints.addAll(constraints);
+    constraints.forEach(c -> c.setTable(this));
   }
 
   public void addPrivilege(Privilege priv) {
@@ -126,11 +91,11 @@ public class Table implements DbObject, TableSpace {
     final String cols = columns.stream().map(Column::definition).collect(Collectors.joining(", \n", "(\n", "\n)"));
     stmt.append(cols).append("\n");
 
-//  TODO ANSI SQL?  stmt.append(tablespace()).append(";\n");
+    stmt.append(getTablespace().create()).append(";\n");
 
-    final String comms = columns.stream().filter(c -> c.getComments() != null).map(Column::alterComment)
+    final String comments = columns.stream().filter(c -> c.getComments() != null).map(Column::alterComment)
         .collect(Collectors.joining("\n"));
-    stmt.append(comms).append("\n");
+    stmt.append(comments).append("\n");
 
     final String idxs = indexes.stream().filter(i -> !isConstraint(i)).map(Index::createStatement)
         .collect(Collectors.joining("\n"));
@@ -141,7 +106,7 @@ public class Table implements DbObject, TableSpace {
 
     for (Privilege grantee : privileges.stream().sorted().collect(Collectors.toList())) {
       stmt.append("grant ");
-      stmt.append(grantee.getPrivileges().map(String::toLowerCase).collect(Collectors.joining(", ")));
+      stmt.append(grantee.sortedActions().map(String::toLowerCase).collect(Collectors.joining(", ")));
       stmt.append(" on ").append(name).append(" to ").append(grantee.getGrantee())
           .append(grantee.getGrantable().equals("Y") ? " with grant option " : "").append(";\n");
     }
@@ -149,32 +114,8 @@ public class Table implements DbObject, TableSpace {
     return stmt.toString();
   }
 
-  private boolean isConstraint(Index index) {
+  public boolean isConstraint(Index index) {
     return constraints.stream().anyMatch(c -> index.name().equals(c.getIndexName()));
-  }
-
-  @Override
-  public String tablespace() {
-    return "tablespace " + tablespaceName + "\n" +
-        "  pctfree " + pctFree + "\n" +
-        "  initrans " + iniTrans + "\n" +
-        "  maxtrans " + maxTrans + "\n" +
-        "  storage\n" + "  (\n" +
-        "    initial " + initial() + "\n" +
-        "    next " + next() + "\n" +
-        "    minextents " + minExtents + "\n" +
-        "    maxextents " + (maxExtents >= Integer.MAX_VALUE - 2 ? "unlimited" : maxExtents) + "\n" +
-        "  )";
-  }
-
-  @Override
-  public String initial() {
-    return TableSpace.iec80000_13(initialExtent);
-  }
-
-  @Override
-  public String next() {
-    return TableSpace.iec80000_13(nextExtent);
   }
 
   public String diff(Table table) {
@@ -185,15 +126,10 @@ public class Table implements DbObject, TableSpace {
 
     Column.diff(getColumns(), table.getColumns());
 
-    if (!getTablespaceName().equals(table.getTablespaceName()))
-      sb.append("old value: ").append(getTablespaceName()).append(" new value: ").append(table.getTablespaceName());
+    if (!getTablespace().equals(table.getTablespace()))
+      sb.append("old value: ").append(getTablespace()).append(" new value: ").append(table.getTablespace());
     System.out.println(sb);
     return sb.toString();
-  }
-
-  @Override
-  public String type() {
-    return "TABLE";
   }
 
   @Override
@@ -201,25 +137,11 @@ public class Table implements DbObject, TableSpace {
     return "tab";
   }
 
+  public String toString() {
+    return name();
+  }
+
   public static class Column {
-
-    public static List<Column> diff(List<Column> columns1, List<Column> columns2) {
-      List<Column> missing = columns1.stream().filter(e1 -> columns2.stream().noneMatch(e2 -> e2.equalsName(e1)))
-          .collect(Collectors.toList());
-      System.out.println("missing columns; :" + missing);
-
-      List<Column> toDelete = columns2.stream().filter(e2 -> columns1.stream().noneMatch(e1 -> e1.equalsName(e2)))
-          .collect(Collectors.toList());
-      System.out.println("toDelete columns; :" + toDelete);
-
-      List<Column> toUpdate = columns1.stream()
-          .filter(e1 -> columns2.stream().anyMatch(e2 -> e2.equalsName(e1) && !e2.equals(e1)))
-          .collect(Collectors.toList());
-      System.out.println("toUpdate columns; :" + toUpdate);
-
-      return Stream.concat(Stream.concat(missing.stream(), toDelete.stream()), toUpdate.stream())
-          .collect(Collectors.toList());
-    }
 
     protected Table table;
     protected String name;
@@ -236,8 +158,26 @@ public class Table implements DbObject, TableSpace {
     protected long charLength;
     protected String comments;
 
+    public static List<Column> diff(List<Column> columns1, List<Column> columns2) {
+      List<Column> missing = columns1.stream().filter(e1 -> columns2.stream().noneMatch(e2 -> e2.equalsName(e1)))
+          .collect(Collectors.toList());
+      System.out.println("missing columns; :" + missing);
+
+      List<Column> toDelete = columns2.stream().filter(e2 -> columns1.stream().noneMatch(e1 -> e1.equalsName(e2)))
+          .collect(Collectors.toList());
+      System.out.println("toDelete columns; :" + toDelete);
+
+      List<Column> toAlter = columns1.stream()
+          .filter(e1 -> columns2.stream().anyMatch(e2 -> e2.equalsName(e1) && !e2.equals(e1)))
+          .collect(Collectors.toList());
+      System.out.println("toUpdate columns; :" + toAlter);
+
+      return Stream.concat(Stream.concat(missing.stream(), toDelete.stream()), toAlter.stream())
+          .collect(Collectors.toList());
+    }
+
     public void setTable(Table table) {
-      this.table = (Table) table;
+      this.table = table;
     }
 
     @JsonProperty("name")
@@ -361,16 +301,19 @@ public class Table implements DbObject, TableSpace {
 
   }
 
-  public static class Privilege implements Comparable<Privilege> {
+  public static class Privilege {
 
-    public static final List<String> ORDER = Arrays.asList("SELECT", "INSERT", "UPDATE", "DELETE");
-
+    private static final List<String> ORDER = Arrays.asList("SELECT", "INSERT", "UPDATE", "DELETE");
+    protected final List<String> actions = new ArrayList<>();
     protected String grantee;
     protected String grantable;
-    protected final List<String> privileges = new ArrayList<>();
 
-    protected void addPriv(String priv) {
-      privileges.add(priv);
+    public List<String> getActions() {
+      return actions;
+    }
+
+    protected void addAction(String action) {
+      actions.add(action);
     }
 
     public String getGrantee() {
@@ -381,13 +324,9 @@ public class Table implements DbObject, TableSpace {
       return grantable;
     }
 
-    public Stream<String> getPrivileges() {
-      return privileges.stream().sorted(Comparator.comparingInt(ORDER::indexOf));
-    }
-
-    @Override
-    public int compareTo(Privilege o) {
-      return getGrantee().compareTo(o.getGrantee());
+    @JsonIgnore
+    public Stream<String> sortedActions() {
+      return actions.stream().sorted(Comparator.comparingInt(ORDER::indexOf));
     }
 
   }

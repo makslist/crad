@@ -26,11 +26,6 @@ public class Library implements DbObject, Source {
   }
 
   @Override
-  public String type() {
-    return "LIBRARY";
-  }
-
-  @Override
   public String typeShort() {
     return "lib";
   }

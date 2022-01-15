@@ -27,14 +27,14 @@ public class View implements DbObject, Source {
     return text;
   }
 
-  @Override
-  public String createStatement() {
-    return "create or replace view " + name + " as\n" + String.join("\n", text) + ";\n";
+  @JsonProperty("text")
+  public void setText(List<String> text) {
+    this.text = text;
   }
 
   @Override
-  public String type() {
-    return "VIEW";
+  public String createStatement() {
+    return "create or replace view " + name + " as\n" + String.join("\n", text) + ";\n";
   }
 
   @Override

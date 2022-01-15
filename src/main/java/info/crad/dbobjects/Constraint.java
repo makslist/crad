@@ -3,7 +3,6 @@ package info.crad.dbobjects;
 import com.fasterxml.jackson.annotation.*;
 
 import java.util.*;
-import java.util.stream.*;
 
 public class Constraint implements DbObject {
 
@@ -50,13 +49,12 @@ public class Constraint implements DbObject {
   public String createStatement() {
     StringBuilder stmt = new StringBuilder("alter table ").append(table.name().toUpperCase()).append("\n");
     if (constraintType.equals("P")) {
-      stmt.append("  add constraint ").append(name).append(constraintType.equals("P") ? " primary key " : "");
-      final String cols = columns.stream().collect(Collectors.joining(", ", "(", ")"));
-      stmt.append(cols).append("\n");
+      stmt.append("  add constraint ").append(name).append(" primary key ");
+      stmt.append("(").append(String.join(", ", columns)).append(")\n");
 
       stmt.append("  using index\n");
       final Index index = table.getIndex(indexName);
-      stmt.append(index.tablespace()).append(";\n");
+      stmt.append(index.getTablespace().create()).append(";\n");
       if (index.getLogging().equals("NO"))
         stmt.append("alter index ").append(index.name()).append(" nologging;");
       stmt.append("\n");
@@ -72,10 +70,6 @@ public class Constraint implements DbObject {
 
   public String toString() {
     return name;
-  }
-
-  public String type() {
-    return "GRANT";
   }
 
   public String typeShort() {

@@ -1,54 +1,147 @@
 package info.crad.dbobjects;
 
-import info.crad.export.*;
+import info.crad.io.*;
 
 import java.io.*;
 import java.sql.*;
+import java.util.*;
 
 public interface Product {
 
-  Table table(Connection conn, String tableName) throws SQLException;
+  Function function(String name) throws SQLException;
 
-  int tables(Connection conn, Exporter exporter) throws SQLException, IOException;
+  default Function function(String name, Importer importer) throws IOException {
+    return importer.read(name, Function.class);
+  }
 
-  DbPackage dbPackage(Connection conn, String packageName) throws SQLException;
+  List<Function> functions() throws SQLException;
 
-  int packages(Connection conn, Exporter exporter) throws SQLException, IOException;
+  void exportFunctions(Exporter exporter) throws SQLException, IOException;
 
-  View view(Connection conn, String viewName) throws SQLException;
+  void importFunctions(Importer importer) throws IOException, SQLException;
 
-  int views(Connection conn, Exporter exporter) throws SQLException, IOException;
+  JavaSource javaSource(String name) throws SQLException;
 
-  Synonym synonym(Connection conn, String synonymName) throws SQLException;
+  default JavaSource javaSource(String name, Importer importer) throws IOException {
+    return importer.read(name, JavaSource.class);
+  }
 
-  int synonyms(Connection conn, Exporter exporter) throws SQLException, IOException;
+  List<JavaSource> javaSources() throws SQLException;
 
-  Function function(Connection conn, String functionName) throws SQLException;
+  void exportJavaSources(Exporter exporter) throws SQLException, IOException;
 
-  int functions(Connection conn, Exporter exporter) throws SQLException, IOException;
+  void importJavaSources(Importer importer) throws IOException, SQLException;
 
-  Procedure procedure(Connection conn, String procedureName) throws SQLException;
+  Library library(String name) throws SQLException;
 
-  int procedures(Connection conn, Exporter exporter) throws SQLException, IOException;
+  default Library library(String name, Importer importer) throws IOException {
+    return importer.read(name, Library.class);
+  }
 
-  JavaSource javaSource(Connection conn, String javaSourceName) throws SQLException;
+  List<Library> libraries() throws SQLException;
 
-  int javaSources(Connection conn, Exporter exporter) throws SQLException, IOException;
+  void exportLibraries(Exporter exporter) throws SQLException, IOException;
 
-  Library library(Connection conn, String libraryName) throws SQLException;
+  void importLibraries(Importer importer) throws IOException, SQLException;
 
-  int libraries(Connection conn, Exporter exporter) throws SQLException, IOException;
+  DbPackage dbPackage(String name) throws SQLException;
 
-  Sequence sequence(Connection conn, String sequenceName) throws SQLException;
+  default DbPackage dbPackage(String name, Importer importer) throws IOException {
+    return importer.read(name, DbPackage.class);
+  }
 
-  int sequences(Connection conn, Exporter exporter) throws SQLException, IOException;
+  List<DbPackage> dbPackages() throws SQLException;
 
-  Trigger trigger(Connection conn, String sequenceName) throws SQLException;
+  void exportPackages(Exporter exporter) throws SQLException, IOException;
 
-  int triggers(Connection conn, Exporter exporter) throws SQLException, IOException;
+  void importPackages(Importer importer) throws IOException, SQLException;
 
-  Type type(Connection conn, String sequenceName) throws SQLException;
+  Procedure procedure(String name) throws SQLException;
 
-  int types(Connection conn, Exporter exporter) throws SQLException, IOException;
+  default Procedure procedure(String name, Importer importer) throws IOException {
+    return importer.read(name, Procedure.class);
+  }
+
+  List<Procedure> procedures() throws SQLException;
+
+  void exportProcedures(Exporter exporter) throws SQLException, IOException;
+
+  void importProcedures(Importer importer) throws IOException, SQLException;
+
+  Sequence sequence(String name) throws SQLException;
+
+  default Sequence sequence(String name, Importer importer) throws IOException {
+    return importer.read(name, Sequence.class);
+  }
+
+  List<Sequence> sequences() throws SQLException;
+
+  void exportSequences(Exporter exporter) throws SQLException, IOException;
+
+  void importSequences(Importer importer) throws IOException, SQLException;
+
+  Synonym synonym(String name) throws SQLException;
+
+  default Synonym synonym(String name, Importer importer) throws IOException {
+    return importer.read(name, Synonym.class);
+  }
+
+  List<Synonym> synonyms() throws SQLException;
+
+  void exportSynonyms(Exporter exporter) throws SQLException, IOException;
+
+  void importSynonyms(Importer importer) throws IOException, SQLException;
+
+  Table table(String name) throws SQLException;
+
+  default Table table(String name, Importer importer) throws IOException {
+    return importer.read(name, Table.class);
+  }
+
+  List<Table> tables() throws SQLException;
+
+  void exportTables(Exporter exporter) throws SQLException, IOException;
+
+  void importTables(Importer importer) throws IOException, SQLException;
+
+  Trigger trigger(String name) throws SQLException;
+
+  default Trigger trigger(String name, Importer importer) throws IOException {
+    return importer.read(name, Trigger.class);
+  }
+
+  List<Trigger> triggers() throws SQLException;
+
+  void exportTriggers(Exporter exporter) throws SQLException, IOException;
+
+  void importTriggers(Importer importer) throws IOException, SQLException;
+
+  Type type(String name) throws SQLException;
+
+  default Type type(String name, Importer importer) throws IOException {
+    return importer.read(name, Type.class);
+  }
+
+  List<Type> types() throws SQLException;
+
+  void exportTypes(Exporter exporter) throws SQLException, IOException;
+
+  void importTypes(Importer importer) throws IOException, SQLException;
+
+  View view(String name) throws SQLException;
+
+  default View view(String name, Importer importer) throws IOException {
+    return importer.read(name, View.class);
+  }
+
+  List<View> views() throws SQLException;
+
+  void exportViews(Exporter exporter) throws SQLException, IOException;
+
+  void importViews(Importer importer) throws IOException, SQLException;
+
+  void exportAll(Exporter exporter) throws SQLException, IOException;
+
+  void importAll(Importer importer) throws IOException, SQLException;
 
 }

@@ -34,11 +34,6 @@ public class Synonym implements DbObject {
   }
 
   @Override
-  public String type() {
-    return "SYNONYM";
-  }
-
-  @Override
   public String typeShort() {
     return "syn";
   }

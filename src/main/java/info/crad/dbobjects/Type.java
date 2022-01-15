@@ -26,11 +26,6 @@ public class Type implements DbObject, Source {
   }
 
   @Override
-  public String type() {
-    return "TYPE";
-  }
-
-  @Override
   public String typeShort() {
     return "tps";
   }

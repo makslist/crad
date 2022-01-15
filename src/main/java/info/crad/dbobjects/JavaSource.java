@@ -26,11 +26,6 @@ public class JavaSource implements DbObject, Source {
   }
 
   @Override
-  public String type() {
-    return "JAVA SOURCE";
-  }
-
-  @Override
   public String typeShort() {
     return "jsp";
   }

@@ -26,11 +26,6 @@ public class Trigger implements DbObject, Source {
   }
 
   @Override
-  public String type() {
-    return "TRIGGER";
-  }
-
-  @Override
   public String typeShort() {
     return "trg";
   }
