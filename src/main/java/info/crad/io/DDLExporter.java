@@ -19,7 +19,7 @@ public class DDLExporter implements Exporter {
       File path = new File(basePath, object.getClass().getSimpleName().toLowerCase());
       if (path.isDirectory() || path.mkdir()) {
         try (BufferedWriter bw = new BufferedWriter(
-            new FileWriter(new File(path, object.name().toLowerCase() + "." + object.typeShort())))) {
+            new FileWriter(new File(path, object.name().toLowerCase() + "." + "sql")))) {
           bw.write(object.createStatement());
         }
       }

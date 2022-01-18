@@ -26,9 +26,4 @@ public class Function implements DbObject, Source {
     return "create or replace function " + name + " as " + String.join("\n", code) + "\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "fnc";
-  }
-
 }

@@ -7,14 +7,13 @@ import java.util.stream.*;
 
 public class Index implements DbObject {
 
-  public Tablespace tablespace;
+  private Tablespace tablespace;
   private Table table;
   private String name;
   private String indexType;
   private String tableOwner;
   private String logging;
   private String constraintIndex;
-
   private List<Column> columns = new ArrayList<>();
 
   public void setTable(Table table) {
@@ -73,13 +72,23 @@ public class Index implements DbObject {
     return stmt.toString();
   }
 
-  public String toString() {
-    return name;
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Index))
+      return false;
+
+    Index idx = (Index) obj;
+    return Objects.equals(name, idx.name)
+        && Objects.equals(indexType, idx.indexType)
+        && Objects.equals(tableOwner, idx.tableOwner)
+        && Objects.equals(table.name(), idx.table.name())
+        && Objects.deepEquals(columns, idx.columns)
+        && Objects.equals(logging, idx.logging)
+        && Objects.equals(constraintIndex, idx.constraintIndex)
+        && Objects.equals(tablespace, idx.tablespace);
   }
 
-  @Override
-  public String typeShort() {
-    return "idx";
+  public String toString() {
+    return name;
   }
 
   public static class Column {
@@ -103,6 +112,15 @@ public class Index implements DbObject {
 
     public String toString() {
       return name;
+    }
+
+    public boolean equals(Object obj) {
+      if (!(obj instanceof Column))
+        return false;
+
+      Column col = (Column) obj;
+      return Objects.equals(name, col.name)
+          && Objects.equals(descend, col.descend);
     }
 
   }

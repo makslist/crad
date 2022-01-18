@@ -68,12 +68,21 @@ public class Constraint implements DbObject {
     return stmt.toString();
   }
 
-  public String toString() {
-    return name;
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Constraint))
+      return false;
+
+    Constraint con = (Constraint) obj;
+    return Objects.equals(name, con.name)
+        && Objects.equals(constraintType, con.constraintType)
+        && Objects.equals(status, con.status)
+        && Objects.equals(table.name(), con.table.name())
+        && Objects.deepEquals(columns, con.columns)
+        && Objects.equals(indexName, con.indexName);
   }
 
-  public String typeShort() {
-    return "sql";
+  public String toString() {
+    return name;
   }
 
 }

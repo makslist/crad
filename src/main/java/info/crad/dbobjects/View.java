@@ -37,9 +37,13 @@ public class View implements DbObject, Source {
     return "create or replace view " + name + " as\n" + String.join("\n", text) + ";\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "vw";
+  public boolean equals(Object obj) {
+    if (!(obj instanceof View))
+      return false;
+
+    View view = (View) obj;
+    return Objects.equals(name, view.name) &&
+        Objects.equals(text, view.text);
   }
 
 }

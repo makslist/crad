@@ -29,9 +29,4 @@ public class DbPackage implements DbObject, Source {
         + String.join("\n", body) + "\n/";
   }
 
-  @Override
-  public String typeShort() {
-    return "pck";
-  }
-
 }

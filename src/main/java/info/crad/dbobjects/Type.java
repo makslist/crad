@@ -25,9 +25,13 @@ public class Type implements DbObject, Source {
     return "create or replace " + String.join("\n", code) + ";\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "tps";
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Type))
+      return false;
+
+    Type type = (Type) obj;
+    return Objects.equals(name, type.name) &&
+        Objects.deepEquals(code, type.code);
   }
 
 }

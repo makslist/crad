@@ -2,7 +2,6 @@ package info.crad;
 
 import info.crad.dbobjects.*;
 import info.crad.io.*;
-import info.crad.product.oracle.*;
 
 import java.io.*;
 import java.sql.*;
@@ -37,11 +36,13 @@ public class Crad {
       } else if (Arrays.asList(args).contains("diff")) {
         System.out.println("Diffing DB objects");
 //        conn.setClientInfo("OCSID.MODULE", "diff");
-        Table tableRef = product.table("amp_container", new JsonImporter(BASE_FOLDER));
+        View tableRef = product.view("v_aen_avise", new JsonImporter(BASE_FOLDER));
 //        System.out.println(tableRef.createStatement());
 
-        OracleTable table = (OracleTable) product.table(tableRef.name());
-        if (table.isEqual(tableRef))
+        View table2 = product.view("v_aen_avise", new JsonImporter(BASE_FOLDER));
+
+//        OracleTable table = (OracleTable) product.table(tableRef.name());
+        if (table2.isEqual(tableRef))
           System.out.println("Tables are equal.");
         else
           System.out.println("Tables are different.");

@@ -25,9 +25,13 @@ public class Trigger implements DbObject, Source {
     return "create or replace " + String.join("\n", code) + "\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "trg";
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Trigger))
+      return false;
+
+    Trigger trigger = (Trigger) obj;
+    return Objects.equals(name, trigger.name) &&
+        Objects.deepEquals(code, trigger.code);
   }
 
 }

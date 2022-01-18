@@ -25,9 +25,4 @@ public class JavaSource implements DbObject, Source {
     return "create or replace and compile java source named \"" + name + "\" as" + String.join("\n", code) + "\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "jsp";
-  }
-
 }

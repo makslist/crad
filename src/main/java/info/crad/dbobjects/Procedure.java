@@ -25,9 +25,4 @@ public class Procedure implements DbObject, Source {
     return "create or replace procedure " + name + " as " + String.join("\n", code) + "\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "prc";
-  }
-
 }

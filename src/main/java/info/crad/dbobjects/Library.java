@@ -25,9 +25,4 @@ public class Library implements DbObject, Source {
     return "create or replace " + String.join("\n", code) + "\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "lib";
-  }
-
 }

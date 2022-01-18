@@ -1,5 +1,7 @@
 package info.crad.dbobjects;
 
+import java.util.*;
+
 public class Tablespace {
 
   protected String tablespaceName;
@@ -72,19 +74,26 @@ public class Tablespace {
         "  initrans " + iniTrans + "\n" +
         "  maxtrans " + maxTrans + "\n" +
         "  storage\n" + "  (\n" +
-        "    initial " + initial() + "\n" +
-        "    next " + next() + "\n" +
+        "    initial " + Tablespace.iec80000_13(initialExtent) + "\n" +
+        "    next " + Tablespace.iec80000_13(nextExtent) + "\n" +
         "    minextents " + minExtents + "\n" +
         "    maxextents " + (maxExtents >= Integer.MAX_VALUE - 2 ? "unlimited" : maxExtents) + "\n" +
         "  )";
   }
 
-  public String initial() {
-    return Tablespace.iec80000_13(initialExtent);
-  }
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Tablespace))
+      return false;
 
-  public String next() {
-    return Tablespace.iec80000_13(nextExtent);
+    Tablespace space = (Tablespace) obj;
+    return Objects.equals(tablespaceName, space.tablespaceName)
+        && Objects.equals(pctFree, space.pctFree)
+        && Objects.equals(iniTrans, space.iniTrans)
+        && Objects.equals(maxTrans, space.maxTrans)
+        && Objects.equals(initialExtent, space.initialExtent)
+        && Objects.equals(nextExtent, space.nextExtent)
+        && Objects.equals(minExtents, space.minExtents)
+        && Objects.equals(maxExtents, space.maxExtents);
   }
 
 }

@@ -82,13 +82,21 @@ public class OracleTable extends Table {
   }
 
   public boolean isEqual(Table obj) {
-    return Objects.equals(name, obj.name)
-        && Objects.equals(getTablespace(), obj.getTablespace())
-        && Objects.equals(getComments(), obj.getComments())
-        && Objects.deepEquals(getColumns(), obj.getColumns())
-        && Objects.deepEquals(getIndexes(), obj.getIndexes())
-        && Objects.deepEquals(getConstraints(), obj.getConstraints())
-        && Objects.deepEquals(privileges, obj.privileges);
+    if (!Objects.equals(name, obj.name))
+      return false;
+    if (!Objects.equals(getTablespace(), obj.getTablespace()))
+      return false;
+    if (!Objects.equals(getComments(), obj.getComments()))
+      return false;
+    if (!Objects.deepEquals(getColumns(), obj.getColumns()))
+      return false;
+    if (!Objects.deepEquals(getIndexes(), obj.getIndexes()))
+      return false;
+    if (!Objects.deepEquals(getConstraints(), obj.getConstraints()))
+      return false;
+    if (!Objects.deepEquals(privileges, obj.privileges))
+      return false;
+    return true;
   }
 
   public String alterTo(OracleTable obj) {

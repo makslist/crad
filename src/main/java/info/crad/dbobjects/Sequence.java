@@ -3,6 +3,7 @@ package info.crad.dbobjects;
 import com.fasterxml.jackson.annotation.*;
 
 import java.math.*;
+import java.util.*;
 
 public class Sequence implements DbObject {
 
@@ -62,9 +63,19 @@ public class Sequence implements DbObject {
 //        (orderFlag.equals("Y") ? "order" : "noorder") + "\n";
   }
 
-  @Override
-  public String typeShort() {
-    return "seq";
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Sequence))
+      return false;
+
+    Sequence seq = (Sequence) obj;
+    return Objects.equals(name, seq.name)
+        && Objects.equals(minValue, seq.minValue)
+        && Objects.equals(maxValue, seq.maxValue)
+        && Objects.equals(incrementBy, seq.incrementBy)
+        && Objects.equals(cycleFlag, seq.cycleFlag)
+        && Objects.equals(orderFlag, seq.orderFlag)
+        && Objects.equals(cacheSize, seq.cacheSize)
+        && Objects.equals(lastNumber, seq.lastNumber);
   }
 
 }

@@ -8,13 +8,13 @@ import java.util.stream.*;
 @JsonPropertyOrder({"name", "comments"})
 public class Table implements DbObject {
 
-  public String name;
-  protected String comments;
+  public final List<Privilege> privileges = new ArrayList<>();
   private final List<Column> columns = new ArrayList<>();
-  public Tablespace tablespace;
   private final List<Index> indexes = new ArrayList<>();
   private final List<Constraint> constraints = new ArrayList<>();
-  public final List<Privilege> privileges = new ArrayList<>();
+  public String name;
+  public Tablespace tablespace;
+  protected String comments;
 
   public boolean equalsPk(Table table) {
     return name().equals(table.name());
@@ -118,6 +118,22 @@ public class Table implements DbObject {
     return constraints.stream().anyMatch(c -> index.name().equals(c.getIndexName()));
   }
 
+  public boolean isEqual(Table obj) {
+    if (!Objects.equals(name, obj.name))
+      return false;
+    if (!Objects.equals(getComments(), obj.getComments()))
+      return false;
+    if (!Objects.deepEquals(getColumns(), obj.getColumns()))
+      return false;
+    if (!Objects.deepEquals(getIndexes(), obj.getIndexes()))
+      return false;
+    if (!Objects.deepEquals(getConstraints(), obj.getConstraints()))
+      return false;
+    if (!Objects.deepEquals(privileges, obj.privileges))
+      return false;
+    return Objects.equals(getTablespace(), obj.getTablespace());
+  }
+
   public String diff(Table table) {
     StringBuilder sb = new StringBuilder();
     sb.append("Diffing ").append(table.name());
@@ -130,11 +146,6 @@ public class Table implements DbObject {
       sb.append("old value: ").append(getTablespace()).append(" new value: ").append(table.getTablespace());
     System.out.println(sb);
     return sb.toString();
-  }
-
-  @Override
-  public String typeShort() {
-    return "tab";
   }
 
   public String toString() {
@@ -262,12 +273,13 @@ public class Table implements DbObject {
       return name + ": " + comments;
     }
 
-    public boolean equals(Column col) {
-      if (col == null)
+    public boolean equals(Object obj) {
+      if (!(obj instanceof Column))
         return false;
 
-      return equalsName(col) && dataTypeDefinition().equals(col.dataTypeDefinition())
-          && dataDefault().equals(col.dataDefault()) && isNullable() == col.isNullable();
+      Column col = (Column) obj;
+      return equalsName(col) && Objects.equals(dataTypeDefinition(), col.dataTypeDefinition())
+          && Objects.equals(dataDefault(), col.dataDefault()) && isNullable() == col.isNullable();
     }
 
     public boolean equalsName(Column col) {
@@ -304,6 +316,7 @@ public class Table implements DbObject {
   public static class Privilege {
 
     private static final List<String> ORDER = Arrays.asList("SELECT", "INSERT", "UPDATE", "DELETE");
+
     protected final List<String> actions = new ArrayList<>();
     protected String grantee;
     protected String grantable;
@@ -327,6 +340,16 @@ public class Table implements DbObject {
     @JsonIgnore
     public Stream<String> sortedActions() {
       return actions.stream().sorted(Comparator.comparingInt(ORDER::indexOf));
+    }
+
+    public boolean equals(Object obj) {
+      if (!(obj instanceof Privilege))
+        return false;
+
+      Privilege priv = (Privilege) obj;
+      return Objects.deepEquals(actions, priv.actions)
+          && Objects.equals(grantee, priv.grantee)
+          && Objects.equals(grantable, priv.grantable);
     }
 
   }

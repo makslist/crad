@@ -105,11 +105,6 @@ public class OracleIndex extends Index {
     return name;
   }
 
-  @Override
-  public String typeShort() {
-    return null;
-  }
-
   public static class Column extends Index.Column {
 
     private static final String SQL = "SELECT C.* FROM USER_IND_COLUMNS C JOIN USER_INDEXES I ON (C.INDEX_NAME = I.INDEX_NAME) WHERE I.INDEX_NAME = ? ORDER BY COLUMN_POSITION";

@@ -17,6 +17,4 @@ public interface DbObject {
 
   String createStatement();
 
-  String typeShort();
-
 }
